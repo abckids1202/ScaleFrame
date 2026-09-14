@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111110" />
+    <meta name="description" content="ScaleFrame is a structured creative platform for fictional comparison culture." />
+    <title>ScaleFrame — Make the argument visible</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="topbar" id="top">
+        <a class="brand" href="#top" aria-label="ScaleFrame home">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+          <span>SCALE<span>FRAME</span></span>
+        </a>
+        <nav class="main-nav" aria-label="Primary navigation">
+          <a href="#workspace">Compare</a>
+          <a href="#explore">Explore</a>
+          <a href="#analysis">Analysis</a>
+          <a href="#studio">Studio</a>
+          <a href="#library">Library</a>
+        </nav>
+        <div class="top-actions">
+          <button class="icon-button" type="button" data-action="search" aria-label="Search ScaleFrame">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 4.6 4.6"></path></svg>
+          </button>
+          <button class="text-button" type="button" data-action="signin">Sign in</button>
+          <button class="button button-small button-light" type="button" data-action="new-comparison">Create <span>↗</span></button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero section-pad" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <div class="eyebrow"><span class="eyebrow-dot"></span> STRUCTURED COMPARISON / PUBLIC BETA</div>
+            <h1 id="hero-title">Arguments deserve more than <em>comment sections.</em></h1>
+            <p class="hero-lede">Build the rules, evidence, and reasoning once. Turn the same comparison into a scorecard, analysis, edit, or debate people can actually inspect.</p>
+            <div class="hero-actions">
+              <button class="button button-primary" type="button" data-action="new-comparison">Build a comparison <span>↗</span></button>
+              <a class="button button-quiet" href="#explore">Explore debates <span>↓</span></a>
+            </div>
+            <div class="hero-note"><span class="live-dot"></span><span>One object. Every format.</span><span class="rule"></span><span>WIS / SCD / WW</span></div>
+          </div>
+
+          <div class="hero-stage" aria-label="Interactive comparison preview">
+            <div class="stage-label"><span>LIVE OBJECT</span><span>SF / 001</span></div>
+            <div class="mini-comparison">
+              <div class="mini-head"><span class="mini-type">WIS</span><span class="mini-title">The strategist's ceiling</span><span class="mini-status">DECISIVE</span></div>
+              <div class="mini-meta">COMPOSITE &nbsp;·&nbsp; FEATS + NARRATIVE &nbsp;·&nbsp; NO PREP</div>
+              <div class="versus-row">
+                <div class="fighter fighter-a"><div class="portrait portrait-a">B</div><div><span class="fighter-name">Baku Madarame</span><span class="fighter-sub">Usogui · composite</span></div></div>
+                <div class="versus">VS</div>
+                <div class="fighter fighter-b"><div><span class="fighter-name">Johan Liebert</span><span class="fighter-sub">Monster · manga canon</span></div><div class="portrait portrait-b">J</div></div>
+              </div>
+              <div class="win-band"><span>Baku Madarame</span><strong>WINS</strong><span>6 / 9 categories</span></div>
+              <div class="mini-ledger">
+                <div><span>Planning</span><b>Baku</b><i>0.86</i></div>
+                <div><span>Manipulation</span><b>Johan</b><i>0.91</i></div>
+                <div><span>Adaptability</span><b>Baku</b><i>0.78</i></div>
+                <div><span>Win conditions</span><b>Baku</b><i>0.82</i></div>
+              </div>
+              <div class="mini-foot"><span>↳ 14 evidence links</span><span>Difficulty: High diff</span></div>
+            </div>
+            <div class="stage-timeline">
+              <div class="timeline-top"><span>EDIT STUDIO / 9:16</span><span>00:00 — 00:12</span></div>
+              <div class="timeline-track"><span class="clip clip-image"></span><span class="clip clip-card"></span><span class="clip clip-text"></span><span class="clip clip-audio"></span><span class="playhead"></span></div>
+              <div class="timeline-labels"><span>IMAGE</span><span>COMPARISON CARD</span><span>TEXT / 02</span><span>AUDIO</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="proof-strip section-pad" aria-label="What one comparison can become">
+          <div class="proof-intro"><span class="section-index">01</span><p>One structured object<br />becomes a whole body of work.</p></div>
+          <div class="proof-item"><span class="proof-number">01</span><div><strong>Scorecard</strong><small>Rules + category winners</small></div><span class="proof-arrow">↗</span></div>
+          <div class="proof-item"><span class="proof-number">02</span><div><strong>Evidence trail</strong><small>Claims you can follow</small></div><span class="proof-arrow">↗</span></div>
+          <div class="proof-item"><span class="proof-number">03</span><div><strong>9:16 edit</strong><small>Data-bound by design</small></div><span class="proof-arrow">↗</span></div>
+        </section>
+
+        <section class="object-flow section-pad" id="library" aria-labelledby="flow-title">
+          <div class="section-kicker"><span>THE OBJECT</span><span>01 — 05</span></div>
+          <div class="flow-heading"><h2 id="flow-title">Make the argument once.<br /><em>Move it anywhere.</em></h2><p>The comparison is the source of truth. Every format keeps its versions, definitions, evidence, and counterarguments attached.</p></div>
+          <div class="flow-line" role="list">
+            <div class="flow-step flow-active" role="listitem"><span>01</span><strong>Comparison</strong><small>Scope + winners</small></div><span class="flow-connector">→</span>
+            <div class="flow-step" role="listitem"><span>02</span><strong>Evidence</strong><small>Claims + sources</small></div><span class="flow-connector">→</span>
+            <div class="flow-step" role="listitem"><span>03</span><strong>Analysis</strong><small>Long-form context</small></div><span class="flow-connector">→</span>
+            <div class="flow-step" role="listitem"><span>04</span><strong>Edit</strong><small>Visual rendering</small></div><span class="flow-connector">→</span>
+            <div class="flow-step" role="listitem"><span>05</span><strong>Debate</strong><small>Fork + diff</small></div>
+          </div>
+        </section>
+
+        <section class="workspace section-pad" id="workspace" aria-labelledby="workspace-title">
+          <div class="section-kicker"><span>WORKSPACE / DRAFT 001</span><span id="save-state">SAVED JUST NOW</span></div>
+          <div class="workspace-header"><div><h2 id="workspace-title">Build the comparison.</h2><p>Every decision stays attached to the object.</p></div><div class="workspace-actions"><button class="button button-outline" type="button" data-action="add-category">+ Add category</button><button class="button button-primary" type="button" data-action="publish">Publish draft <span>↗</span></button></div></div>
+          <div class="workspace-grid">
+            <aside class="workspace-rail" aria-label="Workspace navigation">
+              <div class="rail-user"><div class="avatar avatar-user">R</div><div><strong>riku_frame</strong><small>Creator workspace</small></div><span class="rail-chevron">⌄</span></div>
+              <div class="rail-group"><span class="rail-label">OBJECT</span><button class="rail-link active" type="button"><span class="rail-icon">⌁</span> Comparison <span class="rail-count">01</span></button><button class="rail-link" type="button" data-action="toast" data-message="Evidence queue is next in the build. "><span class="rail-icon">◌</span> Evidence <span class="rail-count">14</span></button><button class="rail-link" type="button" data-action="toast" data-message="Analysis studio is connected to this object."><span class="rail-icon">▤</span> Analysis</button></div>
+              <div class="rail-group"><span class="rail-label">RENDER</span><button class="rail-link" type="button" data-scroll="#studio"><span class="rail-icon">▣</span> Edit studio</button><button class="rail-link" type="button" data-action="toast" data-message="Publishing controls are ready after the draft is complete."><span class="rail-icon">↗</span> Publish</button></div>
+              <div class="rail-footer"><span class="live-dot"></span> Autosave on<br /><small>Private draft · Revision 04</small></div>
+            </aside>
+
+            <div class="comparison-panel">
+              <div class="panel-topline"><span>COMPARISON / DECISIVE</span><span class="status-chip" id="status-chip">DRAFT</span></div>
+              <div class="comparison-title-row"><div><h3 id="comparison-title">Baku Madarame <span>vs</span> Johan Liebert</h3><p id="comparison-subtitle">The strategist's ceiling · Two character versions, one inspectable argument.</p></div><button class="more-button" type="button" data-action="toast" data-message="More comparison actions coming soon.">•••</button></div>
+              <div class="domain-tabs" role="tablist" aria-label="Comparison domain"><button class="domain-tab active" type="button" role="tab" aria-selected="true" data-domain="WIS">WIS <small>POWER</small></button><button class="domain-tab" type="button" role="tab" aria-selected="false" data-domain="SCD">SCD <small>OUTSMART</small></button><button class="domain-tab" type="button" role="tab" aria-selected="false" data-domain="WW">WW <small>WRITING</small></button></div>
+              <div class="participant-strip"><div class="participant participant-a"><div class="portrait portrait-a">B</div><div><span>PARTICIPANT A</span><strong>Baku Madarame</strong><small>Usogui · composite version</small></div><button type="button" data-action="toast" data-message="Version selector ready for the next iteration." aria-label="Edit Baku Madarame version">⌄</button></div><div class="participant-vs">VS</div><div class="participant participant-b"><div><span>PARTICIPANT B</span><strong>Johan Liebert</strong><small>Monster · manga canon</small></div><div class="portrait portrait-b">J</div><button type="button" data-action="toast" data-message="Version selector ready for the next iteration." aria-label="Edit Johan Liebert version">⌄</button></div></div>
+              <div class="rule-bar"><span class="rule-bar-label">RULE SET</span><span class="rule-tag">FEATS + NARRATIVE</span><span class="rule-tag">NO PREP</span><span class="rule-tag">STANDARD EQUIPMENT</span><button type="button" data-action="toast" data-message="Rule set editor is ready to wire in.">+ Edit rules</button></div>
+              <div class="ledger-head"><span>CATEGORY LEDGER</span><span id="metric-count">09 METRICS</span></div>
+              <div class="category-table" id="category-table"></div>
+              <div class="ledger-foot"><span><i class="confidence-dot"></i> Confidence reflects evidence quality, not popularity.</span><button type="button" data-action="toast" data-message="Metric definitions are immutable once published.">View metric definitions ↗</button></div>
+            </div>
+
+            <aside class="inspector" aria-label="Selected category inspector">
+              <div class="inspector-head"><span>INSPECTOR / CATEGORY</span><button class="close-inspector" type="button" aria-label="Clear selected category" data-action="clear-inspector">×</button></div>
+              <div class="inspector-body" id="inspector-body"></div>
+              <div class="bound-edit" id="studio" aria-labelledby="studio-title">
+                <div class="inspector-head"><span>BOUND EDIT LAYER</span><span class="binding-dot"></span></div>
+                <div class="edit-preview"><div class="edit-top"><span>SF / 9:16</span><span>00:06</span></div><div class="edit-canvas"><div class="edit-canvas-label">COMPARISON<br /><b id="edit-category">PLANNING</b></div><div class="edit-canvas-vs"><span>BAKU</span><b>VS</b><span>JOHAN</span></div><div class="edit-canvas-win" id="edit-winner">BAKU WINS</div><div class="scanline"></div></div><div class="edit-timeline"><button class="play-button" type="button" data-action="play" aria-label="Play edit preview">▶</button><div class="micro-track"><span class="micro-clip micro-clip-a"></span><span class="micro-clip micro-clip-b"></span><span class="micro-clip micro-clip-c"></span><span class="micro-playhead"></span></div></div></div>
+                <div class="edit-controls"><button type="button" data-action="add-layer">+ Layer</button><button type="button" data-action="toast" data-message="Layer inspector is ready for full studio mode.">Inspector ↗</button></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="domains section-pad" id="analysis" aria-labelledby="domains-title">
+          <div class="section-kicker"><span>THREE LENSES</span><span>NOT ONE SCORE</span></div>
+          <div class="domains-heading"><h2 id="domains-title">Different questions<br /><em>need different instruments.</em></h2><p>ScaleFrame keeps powerscaling, smart character debate, and writing analysis distinct—then lets them share the same versions and evidence.</p></div>
+          <div class="domain-grid">
+            <article class="domain-card domain-wis"><div class="domain-card-top"><span>WIS</span><span>01</span></div><h3>Power<br /><em>in context.</em></h3><p>Scaling chains, feats, abilities, cosmology, and win conditions with the assumptions in view.</p><a href="#workspace" data-domain-link="WIS">Open WIS lens <span>↗</span></a></article>
+            <article class="domain-card domain-scd"><div class="domain-card-top"><span>SCD</span><span>02</span></div><h3>Outsmarting<br /><em>with receipts.</em></h3><p>Planning, deception, prediction, adaptability, and the evidence behind the read.</p><a href="#workspace" data-domain-link="SCD">Open SCD lens <span>↗</span></a></article>
+            <article class="domain-card domain-ww"><div class="domain-card-top"><span>WW</span><span>03</span></div><h3>Writing<br /><em>as argument.</em></h3><p>Characterization, themes, dynamics, voice, and the subjective line between taste and craft.</p><a href="#workspace" data-domain-link="WW">Open WW lens <span>↗</span></a></article>
+          </div>
+        </section>
+
+        <section class="explore section-pad" id="explore" aria-labelledby="explore-title">
+          <div class="section-kicker"><span>PUBLIC LIBRARY</span><span>RECENT OBJECTS</span></div>
+          <div class="explore-heading"><div><h2 id="explore-title">Browse the argument.</h2><p>See what people are comparing, citing, and challenging right now.</p></div><button class="button button-outline" type="button" data-action="search">Search library <span>⌕</span></button></div>
+          <div class="explore-grid">
+            <div class="recent-list"><div class="list-heading"><span>RECENT COMPARISONS</span><a href="#workspace">View all ↗</a></div><article class="recent-row"><span class="recent-index">01</span><div class="recent-main"><div><span class="mini-type scd-type">SCD</span><span class="recent-age">12 MIN AGO</span></div><h3>Who turns a losing position first?</h3><p>Tokuchi Toua <b>vs</b> Akagi Shigeru · 31 categories</p></div><strong class="recent-result">TOKUCHI<br /><small>HIGH DIFF</small></strong></article><article class="recent-row"><span class="recent-index">02</span><div class="recent-main"><div><span class="mini-type ww-type">WW</span><span class="recent-age">38 MIN AGO</span></div><h3>Trauma as architecture</h3><p>Guts <b>vs</b> Thorfinn · character writing · exploratory</p></div><strong class="recent-result result-neutral">OPEN<br /><small>8 CLAIMS</small></strong></article><article class="recent-row"><span class="recent-index">03</span><div class="recent-main"><div><span class="mini-type">WIS</span><span class="recent-age">1 HR AGO</span></div><h3>Can the hax close the gap?</h3><p>Yhwach <b>vs</b> Giorno · 22 categories</p></div><strong class="recent-result">YHWACH<br /><small>NO DIFF</small></strong></article></div>
+            <aside class="review-rail"><div class="list-heading"><span>METRIC REVIEW QUEUE</span><span class="queue-count">04</span></div><div class="review-item"><div class="review-icon review-cyan">↗</div><div><strong>Counter-planning</strong><p>SCD · proposed by @mizu</p><span class="review-state">3 reviews needed</span></div></div><div class="review-item"><div class="review-icon review-wine">✦</div><div><strong>Narrative integration</strong><p>WW · version 02</p><span class="review-state">Community reviewed</span></div></div><div class="review-item"><div class="review-icon review-orange">⌁</div><div><strong>Attack potency</strong><p>WIS · definition update</p><span class="review-state">2 reviews needed</span></div></div><button class="text-link" type="button" data-action="toast" data-message="The full review queue is coming soon.">Open review queue ↗</button></aside>
+          </div>
+        </section>
+
+        <section class="closing section-pad" aria-labelledby="closing-title"><div class="closing-mark"><span></span><span></span><span></span></div><div><span class="eyebrow">A BETTER HOME FOR THE ARGUMENT</span><h2 id="closing-title">Make the thing<br /><em>worth debating.</em></h2></div><button class="button button-primary" type="button" data-action="new-comparison">Start with a comparison <span>↗</span></button></section>
+      </main>
+
+      <footer class="footer section-pad"><div class="footer-top"><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><span>SCALE<span>FRAME</span></span></a><p>Structured creative tools for fictional comparison culture.</p><div class="footer-links"><a href="#workspace">Methodology</a><a href="#explore">Guidelines</a><a href="#top">Copyright</a><a href="#top">Status</a></div></div><div class="footer-bottom"><span>© 2026 SCALEFRAME / PRIVATE BETA</span><span>BUILT FOR BETTER RECEIPTS.</span></div></footer>
+    </div>
+
+    <dialog class="modal" id="new-comparison-modal" aria-labelledby="modal-title">
+      <form method="dialog" id="new-comparison-form">
+        <div class="modal-head"><div><span class="eyebrow">NEW OBJECT</span><h2 id="modal-title">Start a comparison.</h2></div><button class="close-inspector" type="submit" value="cancel" aria-label="Close">×</button></div>
+        <p class="modal-copy">Set the shape of the argument first. You can refine versions, rules, and evidence inside the workspace.</p>
+        <label>Working title<input name="title" type="text" value="The strategist's ceiling" required /></label>
+        <label>Primary lens<select name="domain"><option value="WIS">WIS / Powerscaling</option><option value="SCD">SCD / Smart Character Debate</option><option value="WW">WW / Writing Wise</option></select></label>
+        <div class="modal-participants"><label>Participant A<input name="participantA" type="text" value="Baku Madarame" required /></label><label>Participant B<input name="participantB" type="text" value="Johan Liebert" required /></label></div>
+        <div class="modal-actions"><button class="button button-quiet" type="submit" value="cancel">Cancel</button><button class="button button-primary" type="submit" value="create">Create draft <span>↗</span></button></div>
+      </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
