@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function Page() { return <main className="auth-main"><div className="auth-card"><span className="card-label">ACCOUNT / EMAIL VERIFICATION</span><h1>Check your inbox.</h1><p>Use the verification link from Supabase to activate your account. Once verified, return here and sign in to begin a private comparison.</p><Link className="button button-primary" href="/auth/sign-in">Continue to sign in ↗</Link></div></main>; }

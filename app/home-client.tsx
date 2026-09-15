@@ -35,7 +35,6 @@ export default function HomeClient() {
   const [domain, setDomain] = useState<Domain>("SCD");
   const [selected, setSelected] = useState(0);
   const [search, setSearch] = useState("");
-  const [notice, setNotice] = useState("");
   const metrics = domainMetrics[domain];
   const selectedMetric = metrics[selected] ?? metrics[0];
   const weightTotal = useMemo(() => metrics.reduce((sum, metric) => sum + metric.weight, 0), [metrics]);
@@ -43,7 +42,7 @@ export default function HomeClient() {
 
   function createComparison(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setNotice("Sign in is required before a draft can be saved. The API is ready for the Supabase account layer.");
+    window.location.assign("/compare/new");
   }
 
   return <SiteShell active="compare">
@@ -61,7 +60,7 @@ export default function HomeClient() {
 
       <section className="domains section-pad" id="analysis" aria-labelledby="domains-title"><div className="section-kicker"><span>THREE LENSES</span><span>NOT ONE SCORE</span></div><div className="domains-heading"><h2 id="domains-title">Different questions<br /><em>need different instruments.</em></h2><p>WIS, SCD, and WW keep their own definitions while sharing versions, citations, and the same inspectable object.</p></div><div className="domain-grid"><article className="domain-card domain-wis"><span>WIS / 01</span><h3>Power <em>in context.</em></h3><p>Scaling chains, feats, abilities, cosmology, and win conditions with assumptions in view.</p><Link href="#workspace">Open WIS lens ↗</Link></article><article className="domain-card domain-scd"><span>SCD / 02</span><h3>Outsmarting <em>with receipts.</em></h3><p>Planning, deception, prediction, adaptability, and the evidence behind the read.</p><Link href="#workspace">Open SCD lens ↗</Link></article><article className="domain-card domain-ww"><span>WW / 03</span><h3>Writing <em>as argument.</em></h3><p>Characterization, themes, dynamics, voice, and the line between taste and craft.</p><Link href="/analysis/strategist-ceiling">Read an analysis ↗</Link></article></div></section>
 
-      <section className="create-section section-pad" id="new-comparison" aria-labelledby="create-title"><div><span className="eyebrow">ACCOUNT-GATED CREATION</span><h2 id="create-title">Put the argument<br /><em>somewhere durable.</em></h2><p>Published work is public. Drafts, metric proposals, uploads, and edits belong to their author.</p></div><form className="create-form" onSubmit={createComparison}><label htmlFor="comparison-title">Working title</label><input id="comparison-title" name="title" placeholder="e.g. The strategist&apos;s ceiling" /><label htmlFor="comparison-domain">Primary lens</label><select id="comparison-domain" name="domain" defaultValue="SCD"><option>WIS / Powerscaling</option><option>SCD / Smart Character Debate</option><option>WW / Writing Wise</option></select><button className="button button-primary" type="submit">Create private draft <span>↗</span></button>{notice ? <p className="form-notice" role="status">{notice}</p> : null}</form></section>
+      <section className="create-section section-pad" id="new-comparison" aria-labelledby="create-title"><div><span className="eyebrow">ACCOUNT-GATED CREATION</span><h2 id="create-title">Put the argument<br /><em>somewhere durable.</em></h2><p>Published work is public. Drafts and edits belong to their author.</p></div><form className="create-form" onSubmit={createComparison}><label htmlFor="comparison-title">Working title</label><input id="comparison-title" name="title" placeholder="e.g. The strategist&apos;s ceiling" /><label htmlFor="comparison-domain">Primary lens</label><select id="comparison-domain" name="domain" defaultValue="SCD"><option>WIS / Powerscaling</option><option>SCD / Smart Character Debate</option><option>WW / Writing Wise</option></select><button className="button button-primary" type="submit">Open comparison editor <span>↗</span></button></form></section>
     </main>
   </SiteShell>;
 }

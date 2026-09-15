@@ -52,6 +52,10 @@ export const comparisons = sqliteTable("comparisons", {
   id: id("id"), slug: text("slug").notNull(), ownerAccountId: text("owner_account_id").notNull(), title: text("title").notNull(), domain: text("domain").notNull(), status: text("status").notNull().default("draft"), formatMode: text("format_mode").notNull().default("decisive"), spoilerLevel: integer("spoiler_level").notNull().default(0), contentRating: text("content_rating").notNull().default("general"), difficulty: text("difficulty").notNull().default("high_diff"), overallMethod: text("overall_method").notNull().default("normalized_weighted_score"), rulesJson: text("rules_json").notNull().default("{}"), revisionNumber: integer("revision_number").notNull().default(1), createdAt: createdAt(), updatedAt: updatedAt(), publishedAt: text("published_at"),
 }, (table) => ({ slugUnique: uniqueIndex("uq_comparisons_slug").on(table.slug), ownerIndex: index("idx_comparisons_owner_status").on(table.ownerAccountId, table.status), publishedIndex: index("idx_comparisons_published_at").on(table.status, table.publishedAt) }));
 
+export const comparisonRevisions = sqliteTable("comparison_revisions", {
+  id: id("id"), comparisonId: text("comparison_id").notNull(), revisionNumber: integer("revision_number").notNull(), createdByAccountId: text("created_by_account_id").notNull(), snapshotJson: text("snapshot_json").notNull(), changeNote: text("change_note").notNull().default(""), createdAt: createdAt(), publishedAt: text("published_at"),
+}, (table) => ({ revisionUnique: uniqueIndex("uq_comparison_revisions_comparison_revision").on(table.comparisonId, table.revisionNumber), comparisonIndex: index("idx_comparison_revisions_comparison_created").on(table.comparisonId, table.createdAt) }));
+
 export const comparisonParticipants = sqliteTable("comparison_participants", {
   id: id("id"), comparisonId: text("comparison_id").notNull(), characterVersionId: text("character_version_id").notNull(), side: text("side").notNull(), displayAlias: text("display_alias"), restrictionsJson: text("restrictions_json").notNull().default("{}"), displayOrder: integer("display_order").notNull().default(0),
 }, (table) => ({ comparisonIndex: index("idx_comparison_participants_comparison_id").on(table.comparisonId) }));
@@ -63,6 +67,14 @@ export const comparisonCategories = sqliteTable("comparison_categories", {
 export const evidence = sqliteTable("evidence", {
   id: id("id"), ownerAccountId: text("owner_account_id").notNull(), sourceWorkId: text("source_work_id"), sourceReference: text("source_reference").notNull(), sourceType: text("source_type").notNull(), claim: text("claim").notNull(), contextNote: text("context_note").notNull().default(""), reliability: text("reliability").notNull().default("unrated"), provenanceJson: text("provenance_json").notNull().default("{}"), spoilerLevel: integer("spoiler_level").notNull().default(0), disputeStatus: text("dispute_status").notNull().default("undisputed"), createdAt: createdAt(), updatedAt: updatedAt(),
 }, (table) => ({ ownerIndex: index("idx_evidence_owner_id").on(table.ownerAccountId) }));
+
+export const claims = sqliteTable("claims", {
+  id: id("id"), ownerAccountId: text("owner_account_id").notNull(), comparisonId: text("comparison_id"), comparisonCategoryId: text("comparison_category_id"), claimText: text("claim_text").notNull(), sourceLabel: text("source_label").notNull(), sourceUrl: text("source_url"), explanation: text("explanation").notNull(), counterargument: text("counterargument").notNull(), reliability: text("reliability").notNull().default("unrated"), spoilerLevel: integer("spoiler_level").notNull().default(0), createdAt: createdAt(), updatedAt: updatedAt(),
+}, (table) => ({ ownerIndex: index("idx_claims_owner_id").on(table.ownerAccountId), comparisonIndex: index("idx_claims_comparison_category").on(table.comparisonId, table.comparisonCategoryId) }));
+
+export const claimEvidenceLinks = sqliteTable("claim_evidence_links", {
+  id: id("id"), claimId: text("claim_id").notNull(), evidenceId: text("evidence_id").notNull(), createdAt: createdAt(),
+}, (table) => ({ linkUnique: uniqueIndex("uq_claim_evidence_links_claim_evidence").on(table.claimId, table.evidenceId), claimIndex: index("idx_claim_evidence_links_claim").on(table.claimId) }));
 
 export const analyses = sqliteTable("analyses", {
   id: id("id"), slug: text("slug").notNull(), ownerAccountId: text("owner_account_id").notNull(), title: text("title").notNull(), domain: text("domain").notNull(), status: text("status").notNull().default("draft"), spoilerLevel: integer("spoiler_level").notNull().default(0), contentRating: text("content_rating").notNull().default("general"), currentRevision: integer("current_revision").notNull().default(1), createdAt: createdAt(), updatedAt: updatedAt(), publishedAt: text("published_at"),
@@ -91,3 +103,11 @@ export const moderationCases = sqliteTable("moderation_cases", {
 export const auditEvents = sqliteTable("audit_events", {
   id: id("id"), actorAccountId: text("actor_account_id"), action: text("action").notNull(), targetType: text("target_type").notNull(), targetId: text("target_id"), metadataJson: text("metadata_json").notNull().default("{}"), ipHash: text("ip_hash"), createdAt: createdAt(),
 }, (table) => ({ actionIndex: index("idx_audit_events_action_created").on(table.action, table.createdAt), actorIndex: index("idx_audit_events_actor_created").on(table.actorAccountId, table.createdAt) }));
+
+export const rateLimits = sqliteTable("rate_limits", {
+  key: text("key").primaryKey(), windowStart: integer("window_start").notNull(), requestCount: integer("request_count").notNull().default(0), updatedAt: updatedAt(),
+});
+
+export const accountJobs = sqliteTable("account_jobs", {
+  id: id("id"), accountId: text("account_id").notNull(), jobType: text("job_type").notNull(), status: text("status").notNull().default("queued"), resultJson: text("result_json").notNull().default("{}"), createdAt: createdAt(), completedAt: text("completed_at"),
+}, (table) => ({ accountJobIndex: index("idx_account_jobs_account_type_created").on(table.accountId, table.jobType, table.createdAt) }));

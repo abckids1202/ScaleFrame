@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { seedCharacters, seedComparisons, seedMetrics, seedWorks } from "../db/seed-data";
+import { getDb } from "../db";
+import { comparisonRevisions, comparisons } from "../db/schema";
+import { and, eq } from "drizzle-orm";
 import { SiteShell } from "./site-shell";
+import SettingsClient from "./settings/settings-client";
 
 export function PublicPage({ eyebrow, title, description, active = "" , children }: { eyebrow: string; title: string; description: string; active?: string; children: React.ReactNode }) {
   return <SiteShell active={active}>
@@ -36,10 +40,13 @@ export function MetricPage({ slug }: { slug: string }) {
   </PublicPage>;
 }
 
-export function ComparisonPage({ slug }: { slug: string }) {
+export async function ComparisonPage({ slug }: { slug: string }) {
   const item = seedComparisons.find((comparison) => comparison.slug === slug) ?? seedComparisons[0];
-  return <PublicPage eyebrow={`COMPARISON / ${item.domain}`} title={item.title} description="A public, versioned comparison with explicit rules, visible weights, evidence links, and a recalculable result." active="compare">
-    <div className="detail-grid"><article className="detail-card comparison-detail"><div className="result-banner"><span>DECLARED RESULT</span><strong>{item.winner}</strong><b>{item.scoreA || "—"} / {item.scoreB || "—"}</b></div><div className="data-list"><div><span>Domain</span><b>{item.domain}</b></div><div><span>Format</span><b>{item.difficulty}</b></div><div><span>Metric categories</span><b>{item.categories}</b></div><div><span>Evidence objects</span><b>{item.evidence}</b></div><div><span>Formula</span><b>Σ(weight × normalized score)</b></div></div><Link className="button button-primary" href="/#workspace">Open comparison ledger ↗</Link></article><aside className="detail-card"><span className="card-label">PUBLISH CHECKLIST</span><ul className="check-list"><li>Explicit participant versions</li><li>Rules and assumptions declared</li><li>Metric definitions and weights visible</li><li>Evidence and counterarguments attached</li><li>Spoiler and content labels set</li></ul><Link className="text-link" href="/analysis/strategist-ceiling">Read linked analysis ↗</Link></aside></div>
+  let stored: { title: string; domain: string; difficulty: string; revisionNumber: number; scoreA?: number; scoreB?: number } | null = null;
+  try { const comparison = (await getDb().select().from(comparisons).where(and(eq(comparisons.slug, slug), eq(comparisons.status, "published"))).limit(1))[0]; if (comparison) { const revision = (await getDb().select().from(comparisonRevisions).where(and(eq(comparisonRevisions.comparisonId, comparison.id), eq(comparisonRevisions.revisionNumber, comparison.revisionNumber))).limit(1))[0]; const snapshot = revision ? JSON.parse(revision.snapshotJson) as { calculation?: { totalA?: number; totalB?: number } } : {}; stored = { title: comparison.title, domain: comparison.domain, difficulty: comparison.difficulty, revisionNumber: comparison.revisionNumber, scoreA: snapshot.calculation?.totalA ? Math.round(snapshot.calculation.totalA * 100) : undefined, scoreB: snapshot.calculation?.totalB ? Math.round(snapshot.calculation.totalB * 100) : undefined }; } } catch { /* public seed fallback remains available while D1 is unavailable */ }
+  const display = stored ?? { ...item, revisionNumber: 0 };
+  return <PublicPage eyebrow={`COMPARISON / ${display.domain}`} title={display.title} description="A public, versioned comparison with explicit rules, visible weights, evidence links, and a recalculable result." active="compare">
+    <div className="detail-grid"><article className="detail-card comparison-detail"><div className="result-banner"><span>DECLARED RESULT</span><strong>{item.winner}</strong><b>{(display.scoreA ?? item.scoreA) || "—"} / {(display.scoreB ?? item.scoreB) || "—"}</b></div><div className="data-list"><div><span>Domain</span><b>{display.domain}</b></div><div><span>Revision</span><b>{display.revisionNumber || "Seed fallback"}</b></div><div><span>Format / difficulty</span><b>{display.difficulty}</b></div><div><span>Metric categories</span><b>{item.categories}</b></div><div><span>Evidence objects</span><b>{item.evidence}</b></div><div><span>Formula</span><b>Σ(weight × normalized score)</b></div></div><Link className="button button-primary" href="/#workspace">Open comparison ledger ↗</Link></article><aside className="detail-card"><span className="card-label">PUBLISH CHECKLIST</span><ul className="check-list"><li>Explicit participant versions</li><li>Rules and assumptions declared</li><li>Metric definitions and weights visible</li><li>Evidence and counterarguments attached</li><li>Spoiler and content labels set</li></ul><Link className="text-link" href="/analysis/strategist-ceiling">Read linked analysis ↗</Link></aside></div>
   </PublicPage>;
 }
 
@@ -57,7 +64,7 @@ export function StudioPage() {
 
 export function SettingsPage() {
   return <PublicPage eyebrow="ACCOUNT / SECURITY" title="Your work stays yours." description="Accounts unlock private drafts, saved items, analysis revisions, Studio projects, and export/delete controls." >
-    <div className="settings-grid"><article className="detail-card"><span className="card-label">AUTHENTICATION</span><h2>Sign in to participate.</h2><p>The Site is public-read by design. Supabase Auth will handle email verification, Google OAuth, password recovery, sessions, and optional authenticator MFA.</p><div className="form-group"><label className="form-label" htmlFor="email">Email</label><input className="form-input" id="email" type="email" placeholder="you@example.com" /></div><div className="form-row"><button className="button button-primary" type="button">Continue with email</button><button className="button button-outline" type="button">Continue with Google</button></div><small className="form-hint">Authentication configuration is intentionally server-side. Add the Supabase environment values before enabling writes in production.</small></article><aside className="detail-card"><span className="card-label">DATA RIGHTS</span><h3>Export or delete</h3><p>When signed in, these controls cover profile data, comparisons, analyses, comments, saved items, notifications, projects, and uploaded assets.</p><div className="settings-actions"><button className="button button-outline" type="button">Request export</button><button className="button button-quiet" type="button">View sessions</button></div><Link className="text-link" href="/moderation">Trust & safety ↗</Link></aside></div>
+    <SettingsClient />
   </PublicPage>;
 }
 

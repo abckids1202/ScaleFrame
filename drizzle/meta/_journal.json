@@ -15,6 +15,13 @@
       "when": 1789450067606,
       "tag": "0001_illegal_naoko",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789467971936,
+      "tag": "0002_brief_garia",
+      "breakpoints": true
     }
   ]
 }

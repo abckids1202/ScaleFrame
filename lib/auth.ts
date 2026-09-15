@@ -1,10 +1,18 @@
 import { env } from "cloudflare:workers";
+import { createRouteSupabaseClient } from "./supabase";
 
 export type CurrentUser = { subject: string; email: string | null; role: "user" | "reviewer" | "moderator" | "admin"; authenticated: boolean };
 type JwtPayload = { sub?: string; email?: string; role?: string; exp?: number; aud?: string; iss?: string };
 type Jwk = JsonWebKey & { kid?: string; alg?: string; use?: string };
 
 export async function getCurrentUser(request: Request): Promise<CurrentUser | null> {
+  try {
+    if (env.SUPABASE_URL && env.SUPABASE_ANON_KEY) {
+      const { client } = createRouteSupabaseClient(request);
+      const { data } = await client.auth.getUser();
+      if (data.user) return { subject: data.user.id, email: data.user.email ?? null, role: "user", authenticated: true };
+    }
+  } catch { /* fall through to bearer verification for service/API clients */ }
   const authorization = request.headers.get("authorization");
   if (!authorization?.startsWith("Bearer ")) return null;
   const payload = await verifySupabaseJwt(authorization.slice(7).trim());
@@ -29,7 +37,7 @@ async function verifySupabaseJwt(token: string): Promise<JwtPayload | null> {
   const key = keySet.keys?.find((candidate) => candidate.kid === header.kid);
   if (!key) return null;
   const cryptoKey = await crypto.subtle.importKey("jwk", key, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
-  const valid = await crypto.subtle.verify({ name: "RSASSA-PKCS1-v1_5" }, cryptoKey, base64UrlBytes(encodedSignature), new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`));
+  const signature = base64UrlBytes(encodedSignature); const signatureBuffer = signature.buffer.slice(signature.byteOffset, signature.byteOffset + signature.byteLength) as ArrayBuffer; const signedData = new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`); const valid = await crypto.subtle.verify({ name: "RSASSA-PKCS1-v1_5" }, cryptoKey, signatureBuffer, signedData);
   return valid ? payload : null;
 }
 
