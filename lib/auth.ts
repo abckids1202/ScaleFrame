@@ -1,0 +1,37 @@
+import { env } from "cloudflare:workers";
+
+export type CurrentUser = { subject: string; email: string | null; role: "user" | "reviewer" | "moderator" | "admin"; authenticated: boolean };
+type JwtPayload = { sub?: string; email?: string; role?: string; exp?: number; aud?: string; iss?: string };
+type Jwk = JsonWebKey & { kid?: string; alg?: string; use?: string };
+
+export async function getCurrentUser(request: Request): Promise<CurrentUser | null> {
+  const authorization = request.headers.get("authorization");
+  if (!authorization?.startsWith("Bearer ")) return null;
+  const payload = await verifySupabaseJwt(authorization.slice(7).trim());
+  if (!payload?.sub) return null;
+  return { subject: payload.sub, email: payload.email ?? null, role: payload.role === "admin" || payload.role === "moderator" || payload.role === "reviewer" ? payload.role : "user", authenticated: true };
+}
+
+async function verifySupabaseJwt(token: string): Promise<JwtPayload | null> {
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  const [encodedHeader, encodedPayload, encodedSignature] = parts;
+  let header: { alg?: string; kid?: string }; let payload: JwtPayload;
+  try { header = JSON.parse(base64UrlDecode(encodedHeader)) as { alg?: string; kid?: string }; payload = JSON.parse(base64UrlDecode(encodedPayload)) as JwtPayload; } catch { return null; }
+  if (header.alg !== "RS256" || !payload.sub || !payload.exp || payload.exp <= Math.floor(Date.now() / 1000)) return null;
+  const issuer = env.SUPABASE_JWT_ISSUER || (env.SUPABASE_URL ? `${env.SUPABASE_URL}/auth/v1` : "");
+  const jwksUrl = env.SUPABASE_JWKS_URL || (env.SUPABASE_URL ? `${env.SUPABASE_URL}/auth/v1/.well-known/jwks.json` : "");
+  if (!issuer || !jwksUrl || (payload.iss && payload.iss !== issuer)) return null;
+  if (payload.aud && payload.aud !== "authenticated") return null;
+  const response = await fetch(jwksUrl, { cf: { cacheTtl: 3600 } });
+  if (!response.ok) return null;
+  const keySet = (await response.json()) as { keys?: Jwk[] };
+  const key = keySet.keys?.find((candidate) => candidate.kid === header.kid);
+  if (!key) return null;
+  const cryptoKey = await crypto.subtle.importKey("jwk", key, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+  const valid = await crypto.subtle.verify({ name: "RSASSA-PKCS1-v1_5" }, cryptoKey, base64UrlBytes(encodedSignature), new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`));
+  return valid ? payload : null;
+}
+
+function base64UrlDecode(value: string): string { return new TextDecoder().decode(base64UrlBytes(value)); }
+function base64UrlBytes(value: string): Uint8Array { const normalized = value.replaceAll("-", "+").replaceAll("_", "/").padEnd(Math.ceil(value.length / 4) * 4, "="); const binary = atob(normalized); return Uint8Array.from(binary, (char) => char.charCodeAt(0)); }
