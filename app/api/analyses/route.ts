@@ -36,6 +36,7 @@ export async function GET(request: Request) {
       ]);
       return { ...row, tags: tags.map((item) => item.tag), subjects, author: "Community researcher", readTime: "Open study", comments: comments.length, revision: String(row.currentRevision).padStart(2, "0") };
     }));
+    if (!rows.length) return jsonResponse({ source: "seed-fallback", analyses: filterAnalyses(researchCatalog, filters) });
     return jsonResponse({ source: "d1", analyses: filterAnalyses(results, filters) });
   } catch {
     return jsonResponse({ source: "seed-fallback", analyses: filterAnalyses(researchCatalog, filters) });
