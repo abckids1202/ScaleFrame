@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { seedCharacters, seedComparisons, seedMetrics, seedWorks } from "../db/seed-data.ts";
+import { researchCatalog } from "../lib/analysis-catalog.ts";
 
 const sql = (value: string | number | null) => value === null ? "NULL" : typeof value === "number" ? String(value) : `'${value.replaceAll("'", "''")}'`;
 const lines: string[] = ["PRAGMA foreign_keys = ON;"];
@@ -21,6 +22,14 @@ for (const metric of seedMetrics) insert("metric_versions", ["id", "slug", "name
 for (const domain of ["WIS", "SCD", "WW"]) {
   const packId = `seed-pack-${domain.toLowerCase()}`; insert("metric_packs", ["id", "slug", "name", "domain", "description", "status", "owner_account_id"], [packId, `${domain.toLowerCase()}-core`, `${domain} Core`, domain, `Curated ${domain} metrics for transparent comparison drafts.`, "curated", "system_seed"]);
   seedMetrics.filter((metric) => metric.domain === domain).forEach((metric, index) => insert("metric_pack_items", ["id", "pack_id", "metric_version_id", "default_weight", "display_order"], [`seed-pack-item-${domain.toLowerCase()}-${metric.slug}`, packId, `seed-metric-${metric.slug}-v1`, metric.defaultWeight, index]));
+}
+for (const analysis of researchCatalog) {
+  const analysisId = analysis.id;
+  insert("analyses", ["id", "slug", "owner_account_id", "title", "domain", "subject_type", "subject_label", "aspect", "summary", "status", "spoiler_level", "content_rating", "current_revision", "published_at"], [analysisId, analysis.slug, "system_seed", analysis.title, analysis.domain, analysis.subjectType, analysis.subjectLabel, analysis.aspect, analysis.summary, "published", 0, "general", Number(analysis.revision), "2026-01-01T00:00:00.000Z"]);
+  insert("analysis_revisions", ["id", "analysis_id", "revision_number", "blocks_json", "plain_text", "change_note"], [`seed-analysis-revision-${analysis.slug}`, analysisId, Number(analysis.revision), "[]", analysis.summary, "Initial curated research import"]);
+  insert("analysis_subjects", ["id", "analysis_id", "subject_type", "label", "aspect"], [`seed-analysis-subject-${analysis.slug}`, analysisId, analysis.subjectType, analysis.subjectLabel, analysis.aspect]);
+  for (const tag of analysis.tags) insert("analysis_tags", ["id", "analysis_id", "tag"], [`seed-analysis-tag-${analysis.slug}-${tag.replaceAll(" ", "-")}`, analysisId, tag]);
+  insert("analysis_comments", ["id", "analysis_id", "revision_number", "author_account_id", "body", "status"], [`seed-analysis-comment-${analysis.slug}`, analysisId, Number(analysis.revision), "system_seed", "Useful framing. I would love to see the strongest counter-reading attached to the next revision.", "visible"]);
 }
 for (const comparison of seedComparisons) {
   const comparisonId = `seed-comparison-${comparison.slug}`; insert("comparisons", ["id", "slug", "owner_account_id", "title", "domain", "status", "format_mode", "content_rating", "difficulty", "overall_method", "revision_number", "published_at"], [comparisonId, comparison.slug, "system_seed", comparison.title, comparison.domain, "published", comparison.winner === "Exploratory" ? "exploratory" : "decisive", "general", comparison.difficulty.toLowerCase().replaceAll(" ", "_"), "normalized_weighted_score", 1, "2026-01-01T00:00:00.000Z"]);

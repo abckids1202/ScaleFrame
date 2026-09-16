@@ -5,6 +5,8 @@ import { comparisonRevisions, comparisons } from "../db/schema";
 import { and, eq } from "drizzle-orm";
 import { SiteShell } from "./site-shell";
 import SettingsClient from "./settings/settings-client";
+import { researchCatalog } from "../lib/analysis-catalog";
+import AnalysisDetailClient from "./analysis/analysis-detail-client";
 
 export function PublicPage({ eyebrow, title, description, active = "" , children }: { eyebrow: string; title: string; description: string; active?: string; children: React.ReactNode }) {
   return <SiteShell active={active}>
@@ -51,8 +53,9 @@ export async function ComparisonPage({ slug }: { slug: string }) {
 }
 
 export function AnalysisPage({ slug }: { slug: string }) {
-  return <PublicPage eyebrow="ANALYSIS / VERSIONED WRITING" title={slug === "strategist-ceiling" ? "The strategist's ceiling" : "Analysis workspace"} description="A versioned essay layer connected to the comparison, its evidence, and reader review comments." active="analysis">
-    <div className="analysis-layout"><article className="analysis-body"><div className="analysis-meta"><span>REVISION 03</span><span>WW / SCD</span><span>PUBLIC DRAFT</span></div><h2>What changes when the argument has a memory?</h2><p>The useful question is not whether a character is simply “smarter.” It is which decisions remain available after the other side changes the information state.</p><p>ScaleFrame treats that reasoning as an inspectable object. Each paragraph can point back to a claim, a source reference, and the version boundary that makes the claim meaningful.</p><blockquote>“A conclusion is stronger when the reader can see what would falsify it.”</blockquote><p>This is the first writing surface: focused, revision-aware, and deliberately single-owner. Public readers can leave review suggestions without silently changing the author’s work.</p><div className="citation-box"><span>LINKED CLAIM</span><strong>Counter-planning preserves the line after the first model breaks.</strong><small>Evidence · Usogui / Kagerou Club arc · source reference pending</small></div></article><aside className="detail-card"><span className="card-label">READER REVIEW</span><p>Comments and suggestions attach to a revision, not an invisible live document.</p><button className="button button-outline" type="button">Sign in to suggest an edit</button><Link className="text-link" href="/comparisons/baku-vs-johan-strategists-ceiling">View source comparison ↗</Link></aside></div>
+  const entry = researchCatalog.find((item) => item.slug === slug) ?? researchCatalog[0];
+  return <PublicPage eyebrow={`ANALYSIS / ${entry.domain} RESEARCH`} title={entry.title} description={entry.summary} active="analysis">
+    <AnalysisDetailClient initialEntry={entry} />
   </PublicPage>;
 }
 

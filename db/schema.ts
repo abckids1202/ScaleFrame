@@ -77,12 +77,24 @@ export const claimEvidenceLinks = sqliteTable("claim_evidence_links", {
 }, (table) => ({ linkUnique: uniqueIndex("uq_claim_evidence_links_claim_evidence").on(table.claimId, table.evidenceId), claimIndex: index("idx_claim_evidence_links_claim").on(table.claimId) }));
 
 export const analyses = sqliteTable("analyses", {
-  id: id("id"), slug: text("slug").notNull(), ownerAccountId: text("owner_account_id").notNull(), title: text("title").notNull(), domain: text("domain").notNull(), status: text("status").notNull().default("draft"), spoilerLevel: integer("spoiler_level").notNull().default(0), contentRating: text("content_rating").notNull().default("general"), currentRevision: integer("current_revision").notNull().default(1), createdAt: createdAt(), updatedAt: updatedAt(), publishedAt: text("published_at"),
+  id: id("id"), slug: text("slug").notNull(), ownerAccountId: text("owner_account_id").notNull(), title: text("title").notNull(), domain: text("domain").notNull(), subjectType: text("subject_type").notNull().default("character"), subjectLabel: text("subject_label").notNull().default(""), aspect: text("aspect").notNull().default("General"), summary: text("summary").notNull().default(""), status: text("status").notNull().default("draft"), spoilerLevel: integer("spoiler_level").notNull().default(0), contentRating: text("content_rating").notNull().default("general"), currentRevision: integer("current_revision").notNull().default(1), createdAt: createdAt(), updatedAt: updatedAt(), publishedAt: text("published_at"),
 }, (table) => ({ slugUnique: uniqueIndex("uq_analyses_slug").on(table.slug), ownerIndex: index("idx_analyses_owner_status").on(table.ownerAccountId, table.status) }));
 
 export const analysisRevisions = sqliteTable("analysis_revisions", {
   id: id("id"), analysisId: text("analysis_id").notNull(), revisionNumber: integer("revision_number").notNull(), blocksJson: text("blocks_json").notNull().default("[]"), plainText: text("plain_text").notNull().default(""), changeNote: text("change_note").notNull().default(""), createdAt: createdAt(),
 }, (table) => ({ revisionUnique: uniqueIndex("uq_analysis_revisions_analysis_revision").on(table.analysisId, table.revisionNumber) }));
+
+export const analysisSubjects = sqliteTable("analysis_subjects", {
+  id: id("id"), analysisId: text("analysis_id").notNull(), subjectType: text("subject_type").notNull(), subjectId: text("subject_id"), label: text("label").notNull(), role: text("role").notNull().default("primary"), aspect: text("aspect").notNull().default("General"), createdAt: createdAt(),
+}, (table) => ({ analysisIndex: index("idx_analysis_subjects_analysis").on(table.analysisId), subjectIndex: index("idx_analysis_subjects_subject").on(table.subjectType, table.subjectId) }));
+
+export const analysisTags = sqliteTable("analysis_tags", {
+  id: id("id"), analysisId: text("analysis_id").notNull(), tag: text("tag").notNull(), createdAt: createdAt(),
+}, (table) => ({ analysisTagUnique: uniqueIndex("uq_analysis_tags_analysis_tag").on(table.analysisId, table.tag), tagIndex: index("idx_analysis_tags_tag").on(table.tag) }));
+
+export const analysisComments = sqliteTable("analysis_comments", {
+  id: id("id"), analysisId: text("analysis_id").notNull(), revisionNumber: integer("revision_number").notNull().default(1), authorAccountId: text("author_account_id").notNull(), body: text("body").notNull(), status: text("status").notNull().default("visible"), createdAt: createdAt(), updatedAt: updatedAt(),
+}, (table) => ({ analysisIndex: index("idx_analysis_comments_analysis_created").on(table.analysisId, table.createdAt), authorIndex: index("idx_analysis_comments_author").on(table.authorAccountId) }));
 
 export const studioProjects = sqliteTable("studio_projects", {
   id: id("id"), ownerAccountId: text("owner_account_id").notNull(), comparisonId: text("comparison_id"), name: text("name").notNull(), preset: text("preset").notNull().default("9:16"), projectJson: text("project_json").notNull().default("{}"), revisionNumber: integer("revision_number").notNull().default(1), createdAt: createdAt(), updatedAt: updatedAt(),

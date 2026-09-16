@@ -1,0 +1,17 @@
+"use client";
+
+import Link from "next/link";
+import { FormEvent, useEffect, useState } from "react";
+
+type Comment = { id: string; body: string; author?: string | null; handle?: string | null; revisionNumber: number; createdAt?: string };
+const starterComments: Comment[] = [
+  { id: "starter-1", body: "The version boundary makes this much easier to enter as a reader. I would be curious to see the strongest disagreement in the next revision.", author: "Community reader", handle: "reader-one", revisionNumber: 3 },
+  { id: "starter-2", body: "The distinction between a plan surviving and a plan winning is a useful one for new debaters.", author: "Mira", handle: "mira", revisionNumber: 3 },
+];
+
+export default function AnalysisDiscussion({ analysisId, revisionNumber }: { analysisId: string; revisionNumber: string }) {
+  const [comments, setComments] = useState<Comment[]>(starterComments); const [body, setBody] = useState(""); const [message, setMessage] = useState(""); const [posting, setPosting] = useState(false);
+  useEffect(() => { fetch(`/api/analyses/${analysisId}/comments`).then((response) => response.ok ? response.json() as Promise<{ comments?: Comment[] }> : Promise.reject()).then((data) => { if (data.comments?.length) setComments(data.comments); }).catch(() => undefined); }, [analysisId]);
+  async function post(event: FormEvent) { event.preventDefault(); setPosting(true); setMessage(""); try { const csrf = await fetch("/api/auth/csrf").then((response) => response.json() as Promise<{ token?: string }>); const response = await fetch(`/api/analyses/${analysisId}/comments`, { method: "POST", headers: { "content-type": "application/json", "x-csrf-token": csrf.token ?? "" }, body: JSON.stringify({ body, revisionNumber: Number(revisionNumber) }) }); const data = await response.json() as { comment?: Comment; message?: string }; if (!response.ok) throw new Error(data.message ?? "Sign in to join the discussion."); if (data.comment) setComments((current) => [...current, data.comment as Comment]); setBody(""); } catch (error) { setMessage(error instanceof Error ? error.message : "Comment could not be posted."); } finally { setPosting(false); } }
+  return <section className="analysis-discussion" aria-labelledby="discussion-title"><div className="discussion-heading"><div><span className="card-label">REVISION {revisionNumber} / READER REVIEW</span><h2 id="discussion-title">Leave the argument better than you found it.</h2></div><span>{comments.length} comments</span></div><div className="discussion-grid"><div className="comment-list">{comments.map((comment) => <article className="comment-card" key={comment.id}><div><strong>{comment.author ?? "Reader"}</strong><span>@{comment.handle ?? "community"} · revision {comment.revisionNumber}</span></div><p>{comment.body}</p></article>)}</div><form className="comment-form" onSubmit={post}><label htmlFor="analysis-comment">Add context, a counter-reading, or a source question.<textarea id="analysis-comment" value={body} onChange={(event) => setBody(event.target.value)} minLength={2} maxLength={2000} required placeholder="Keep the conversation specific and useful…" rows={6} /></label><button className="button button-primary" disabled={posting} type="submit">{posting ? "Posting…" : "Post comment ↗"}</button>{message && <p className="form-error" role="alert">{message} <Link href="/auth/sign-in">Sign in</Link></p>}<small>Comments attach to this revision. They do not change the author’s text.</small></form></div></section>;
+}

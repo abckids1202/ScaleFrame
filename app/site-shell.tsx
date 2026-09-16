@@ -9,7 +9,7 @@ export function SiteShell({ children, active = "" }: { children: React.ReactNode
     <header className="topbar">
       <Brand />
       <nav className="main-nav" aria-label="Primary navigation">
-        {[["Compare", "/#workspace"], ["Explore", "/explore"], ["Analysis", "/analysis/strategist-ceiling"], ["Studio", "/studio/demo"], ["Library", "/library"]].map(([label, href]) => <Link className={active === label.toLowerCase() ? "active" : ""} key={label} href={href}>{label}</Link>)}
+        {[["Compare", "/#workspace"], ["Explore", "/explore"], ["Analysis", "/analysis"], ["Studio", "/studio/demo"], ["Library", "/library"]].map(([label, href]) => <Link className={active === label.toLowerCase() ? "active" : ""} key={label} href={href}>{label}</Link>)}
       </nav>
       <div className="top-actions"><Link className="text-button" href="/auth/sign-in">Account</Link><Link className="button button-small button-light" href="/compare/new">Create <span>↗</span></Link></div>
     </header>
