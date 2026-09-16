@@ -9,6 +9,7 @@ import { enforceRateLimit, writeAudit } from "../../../../../lib/security";
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const id = (await context.params).id;
   try {
+    const analysis = (await getDb().select({ id: analyses.id }).from(analyses).where(and(eq(analyses.id, id), eq(analyses.status, "published"))).limit(1))[0]; if (!analysis) return errorResponse("Analysis not found.", 404, "not_found");
     const rows = await getDb().select({ id: analysisComments.id, body: analysisComments.body, revisionNumber: analysisComments.revisionNumber, createdAt: analysisComments.createdAt, author: profiles.displayName, handle: profiles.handle }).from(analysisComments).leftJoin(profiles, eq(profiles.accountId, analysisComments.authorAccountId)).where(and(eq(analysisComments.analysisId, id), eq(analysisComments.status, "visible"))).orderBy(asc(analysisComments.createdAt)).limit(100);
     return jsonResponse({ comments: rows });
   } catch { return errorResponse("Comments are temporarily unavailable.", 503, "database_unavailable"); }

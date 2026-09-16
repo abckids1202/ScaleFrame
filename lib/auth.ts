@@ -1,5 +1,8 @@
 import { env } from "cloudflare:workers";
 import { createRouteSupabaseClient } from "./supabase";
+import { getDb } from "../db";
+import { accounts } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 export type CurrentUser = { subject: string; email: string | null; emailVerified: boolean; role: "user" | "reviewer" | "moderator" | "admin"; authenticated: boolean };
 type JwtPayload = { sub?: string; email?: string; email_verified?: boolean; role?: string; exp?: number; aud?: string; iss?: string };
@@ -10,13 +13,18 @@ export async function getCurrentUser(request: Request): Promise<CurrentUser | nu
     if (env.SUPABASE_URL && env.SUPABASE_ANON_KEY) {
       const { client } = createRouteSupabaseClient(request);
       const { data } = await client.auth.getUser();
-      if (data.user) return { subject: data.user.id, email: data.user.email ?? null, emailVerified: Boolean(data.user.email_confirmed_at), role: "user", authenticated: true };
+      if (data.user) {
+        let role: CurrentUser["role"] = "user";
+        try { const account = (await getDb().select({ role: accounts.role, deletedAt: accounts.deletedAt }).from(accounts).where(eq(accounts.id, data.user.id)).limit(1))[0]; if (account?.deletedAt) return null; if (account?.role === "reviewer" || account?.role === "moderator" || account?.role === "admin") role = account.role; } catch { /* auth remains available while D1 is unavailable */ }
+        return { subject: data.user.id, email: data.user.email ?? null, emailVerified: Boolean(data.user.email_confirmed_at), role, authenticated: true };
+      }
     }
   } catch { /* fall through to bearer verification for service/API clients */ }
   const authorization = request.headers.get("authorization");
   if (!authorization?.startsWith("Bearer ")) return null;
   const payload = await verifySupabaseJwt(authorization.slice(7).trim());
   if (!payload?.sub) return null;
+  try { const account = (await getDb().select({ deletedAt: accounts.deletedAt }).from(accounts).where(eq(accounts.id, payload.sub)).limit(1))[0]; if (account?.deletedAt) return null; } catch { /* bearer verification remains usable while D1 is unavailable */ }
   return { subject: payload.sub, email: payload.email ?? null, emailVerified: Boolean(payload.email_verified), role: payload.role === "admin" || payload.role === "moderator" || payload.role === "reviewer" ? payload.role : "user", authenticated: true };
 }
 
