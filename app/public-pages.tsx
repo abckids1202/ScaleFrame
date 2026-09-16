@@ -7,6 +7,7 @@ import { SiteShell } from "./site-shell";
 import SettingsClient from "./settings/settings-client";
 import { researchCatalog } from "../lib/analysis-catalog";
 import AnalysisDetailClient from "./analysis/analysis-detail-client";
+import ComparisonReaderClient from "./comparisons/comparison-reader-client";
 
 export function PublicPage({ eyebrow, title, description, active = "" , children }: { eyebrow: string; title: string; description: string; active?: string; children: React.ReactNode }) {
   return <SiteShell active={active}>
@@ -48,7 +49,7 @@ export async function ComparisonPage({ slug }: { slug: string }) {
   try { const comparison = (await getDb().select().from(comparisons).where(and(eq(comparisons.slug, slug), eq(comparisons.status, "published"))).limit(1))[0]; if (comparison) { const revision = (await getDb().select().from(comparisonRevisions).where(and(eq(comparisonRevisions.comparisonId, comparison.id), eq(comparisonRevisions.revisionNumber, comparison.revisionNumber))).limit(1))[0]; const snapshot = revision ? JSON.parse(revision.snapshotJson) as { calculation?: { totalA?: number; totalB?: number } } : {}; stored = { title: comparison.title, domain: comparison.domain, difficulty: comparison.difficulty, revisionNumber: comparison.revisionNumber, scoreA: snapshot.calculation?.totalA ? Math.round(snapshot.calculation.totalA * 100) : undefined, scoreB: snapshot.calculation?.totalB ? Math.round(snapshot.calculation.totalB * 100) : undefined }; } } catch { /* public seed fallback remains available while D1 is unavailable */ }
   const display = stored ?? { ...item, revisionNumber: 0 };
   return <PublicPage eyebrow={`COMPARISON / ${display.domain}`} title={display.title} description="A public, versioned comparison with explicit rules, visible weights, evidence links, and a recalculable result." active="compare">
-    <div className="detail-grid"><article className="detail-card comparison-detail"><div className="result-banner"><span>DECLARED RESULT</span><strong>{item.winner}</strong><b>{(display.scoreA ?? item.scoreA) || "—"} / {(display.scoreB ?? item.scoreB) || "—"}</b></div><div className="data-list"><div><span>Domain</span><b>{display.domain}</b></div><div><span>Revision</span><b>{display.revisionNumber || "Seed fallback"}</b></div><div><span>Format / difficulty</span><b>{display.difficulty}</b></div><div><span>Metric categories</span><b>{item.categories}</b></div><div><span>Evidence objects</span><b>{item.evidence}</b></div><div><span>Formula</span><b>Σ(weight × normalized score)</b></div></div><Link className="button button-primary" href="/#workspace">Open comparison ledger ↗</Link></article><aside className="detail-card"><span className="card-label">PUBLISH CHECKLIST</span><ul className="check-list"><li>Explicit participant versions</li><li>Rules and assumptions declared</li><li>Metric definitions and weights visible</li><li>Evidence and counterarguments attached</li><li>Spoiler and content labels set</li></ul><Link className="text-link" href="/analysis/strategist-ceiling">Read linked analysis ↗</Link></aside></div>
+    <ComparisonReaderClient item={item} display={display} />
   </PublicPage>;
 }
 

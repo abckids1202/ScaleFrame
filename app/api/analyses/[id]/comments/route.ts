@@ -16,7 +16,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   if (!sameOrigin(request) || !validCsrf(request)) return errorResponse("CSRF validation failed.", 403, "csrf_rejected");
-  const user = await getCurrentUser(request); if (!user) return errorResponse("Sign in to join the discussion.", 401, "authentication_required");
+  const user = await getCurrentUser(request); if (!user) return errorResponse("Sign in to join the discussion.", 401, "authentication_required"); if (!user.emailVerified) return errorResponse("Verify your email before commenting.", 403, "email_verification_required");
   const id = (await context.params).id; const payload = await request.json().catch(() => null) as { body?: unknown; revisionNumber?: unknown } | null; const body = safeText(payload?.body, 2000); const revisionNumber = Number(payload?.revisionNumber ?? 1);
   if (body.length < 2 || !Number.isInteger(revisionNumber) || revisionNumber < 1) return errorResponse("Write a short, readable comment.", 400, "validation_failed");
   try {

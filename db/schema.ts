@@ -85,7 +85,7 @@ export const analysisRevisions = sqliteTable("analysis_revisions", {
 }, (table) => ({ revisionUnique: uniqueIndex("uq_analysis_revisions_analysis_revision").on(table.analysisId, table.revisionNumber) }));
 
 export const analysisSubjects = sqliteTable("analysis_subjects", {
-  id: id("id"), analysisId: text("analysis_id").notNull(), subjectType: text("subject_type").notNull(), subjectId: text("subject_id"), label: text("label").notNull(), role: text("role").notNull().default("primary"), aspect: text("aspect").notNull().default("General"), createdAt: createdAt(),
+  id: id("id"), analysisId: text("analysis_id").notNull(), subjectType: text("subject_type").notNull(), subjectId: text("subject_id"), label: text("label").notNull(), versionLabel: text("version_label").notNull().default(""), role: text("role").notNull().default("primary"), aspect: text("aspect").notNull().default("General"), createdAt: createdAt(),
 }, (table) => ({ analysisIndex: index("idx_analysis_subjects_analysis").on(table.analysisId), subjectIndex: index("idx_analysis_subjects_subject").on(table.subjectType, table.subjectId) }));
 
 export const analysisTags = sqliteTable("analysis_tags", {
@@ -95,6 +95,22 @@ export const analysisTags = sqliteTable("analysis_tags", {
 export const analysisComments = sqliteTable("analysis_comments", {
   id: id("id"), analysisId: text("analysis_id").notNull(), revisionNumber: integer("revision_number").notNull().default(1), authorAccountId: text("author_account_id").notNull(), body: text("body").notNull(), status: text("status").notNull().default("visible"), createdAt: createdAt(), updatedAt: updatedAt(),
 }, (table) => ({ analysisIndex: index("idx_analysis_comments_analysis_created").on(table.analysisId, table.createdAt), authorIndex: index("idx_analysis_comments_author").on(table.authorAccountId) }));
+
+export const analysisSourceCards = sqliteTable("analysis_source_cards", {
+  id: id("id"), analysisId: text("analysis_id").notNull(), revisionNumber: integer("revision_number").notNull(), label: text("label").notNull(), locator: text("locator").notNull(), context: text("context").notNull().default(""), sourceUrl: text("source_url"), spoilerLevel: integer("spoiler_level").notNull().default(0), reliability: text("reliability").notNull().default("unrated"), provenanceJson: text("provenance_json").notNull().default("{}"), createdAt: createdAt(),
+}, (table) => ({ revisionIndex: index("idx_analysis_sources_analysis_revision").on(table.analysisId, table.revisionNumber) }));
+
+export const analysisClaims = sqliteTable("analysis_claims", {
+  id: id("id"), analysisId: text("analysis_id").notNull(), revisionNumber: integer("revision_number").notNull(), blockId: text("block_id"), claimText: text("claim_text").notNull(), explanation: text("explanation").notNull(), counterargument: text("counterargument").notNull(), confidence: real("confidence").notNull().default(0.5), createdAt: createdAt(), updatedAt: updatedAt(),
+}, (table) => ({ revisionIndex: index("idx_analysis_claims_analysis_revision").on(table.analysisId, table.revisionNumber), blockIndex: index("idx_analysis_claims_block").on(table.analysisId, table.blockId) }));
+
+export const analysisClaimSourceLinks = sqliteTable("analysis_claim_source_links", {
+  id: id("id"), claimId: text("claim_id").notNull(), sourceCardId: text("source_card_id").notNull(), createdAt: createdAt(),
+}, (table) => ({ linkUnique: uniqueIndex("uq_analysis_claim_source_link").on(table.claimId, table.sourceCardId), claimIndex: index("idx_analysis_claim_source_links_claim").on(table.claimId) }));
+
+export const analysisSuggestions = sqliteTable("analysis_suggestions", {
+  id: id("id"), analysisId: text("analysis_id").notNull(), revisionNumber: integer("revision_number").notNull(), blockId: text("block_id"), authorAccountId: text("author_account_id").notNull(), suggestionType: text("suggestion_type").notNull(), body: text("body").notNull(), status: text("status").notNull().default("pending"), resolutionNote: text("resolution_note"), resolvedByAccountId: text("resolved_by_account_id"), resolvedAt: text("resolved_at"), createdAt: createdAt(), updatedAt: updatedAt(),
+}, (table) => ({ analysisIndex: index("idx_analysis_suggestions_analysis_status").on(table.analysisId, table.status), authorIndex: index("idx_analysis_suggestions_author").on(table.authorAccountId) }));
 
 export const studioProjects = sqliteTable("studio_projects", {
   id: id("id"), ownerAccountId: text("owner_account_id").notNull(), comparisonId: text("comparison_id"), name: text("name").notNull(), preset: text("preset").notNull().default("9:16"), projectJson: text("project_json").notNull().default("{}"), revisionNumber: integer("revision_number").notNull().default(1), createdAt: createdAt(), updatedAt: updatedAt(),

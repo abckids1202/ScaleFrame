@@ -48,14 +48,15 @@ export async function POST(request: Request) {
   const user = await getCurrentUser(request);
   if (!user) return errorResponse("Sign in to start a private research draft.", 401, "authentication_required");
   const payload = await request.json().catch(() => null) as Record<string, unknown> | null;
-  const title = safeText(payload?.title, 160); const domain = safeText(payload?.domain, 8).toUpperCase(); const subjectType = safeText(payload?.subjectType, 20).toLowerCase(); const subjectLabel = safeText(payload?.subjectLabel, 160); const aspect = safeText(payload?.aspect, 160) || "General"; const summary = safeText(payload?.summary, 600); const tags = cleanTags(payload?.tags); const spoilerLevel = Number(payload?.spoilerLevel ?? 0); const contentRating = safeText(payload?.contentRating, 20) || "general";
+  const title = safeText(payload?.title, 160); const domain = safeText(payload?.domain, 8).toUpperCase(); const subjectType = safeText(payload?.subjectType, 20).toLowerCase(); const subjectLabel = safeText(payload?.subjectLabel, 160); const versionLabel = safeText(payload?.versionLabel, 180); const aspect = safeText(payload?.aspect, 160) || "General"; const summary = safeText(payload?.summary, 600); const notes = safeText(payload?.notes, 10000); const tags = cleanTags(payload?.tags); const spoilerLevel = Number(payload?.spoilerLevel ?? 0); const contentRating = safeText(payload?.contentRating, 20) || "general";
   if (!title || !domains.has(domain) || !subjectTypes.has(subjectType) || !subjectLabel || !Number.isInteger(spoilerLevel) || spoilerLevel < 0 || spoilerLevel > 3 || !["general", "mature"].includes(contentRating)) return errorResponse("Title, lens, subject, and content labels are required.", 400, "validation_failed");
   try {
     const limit = await enforceRateLimit(`analysis_create:${user.subject}`, 30, 3600); if (!limit.allowed) return errorResponse("Too many new research drafts. Try again later.", 429, "rate_limited");
     const db = getDb(); await syncAccount({ id: user.subject, email: user.email, email_confirmed_at: null }); const id = newId("analysis"); const slug = `${slugify(title)}-${id.slice(-8)}`;
     await db.insert(analyses).values({ id, slug, ownerAccountId: user.subject, title, domain, subjectType, subjectLabel, aspect, summary, status: "draft", spoilerLevel, contentRating, currentRevision: 1 });
-    await db.insert(analysisRevisions).values({ id: newId("analysisrev"), analysisId: id, revisionNumber: 1, blocksJson: "[]", plainText: "", changeNote: "Research brief created" });
-    await db.insert(analysisSubjects).values({ id: newId("subject"), analysisId: id, subjectType, subjectId: null, label: subjectLabel, aspect });
+    const initialBlocks = notes ? [{ id: "brief-notes", type: "paragraph", heading: "Opening notes", body: notes }] : [];
+    await db.insert(analysisRevisions).values({ id: newId("analysisrev"), analysisId: id, revisionNumber: 1, blocksJson: JSON.stringify(initialBlocks), plainText: notes, changeNote: "Research brief created" });
+    await db.insert(analysisSubjects).values({ id: newId("subject"), analysisId: id, subjectType, subjectId: null, label: subjectLabel, versionLabel, aspect });
     if (tags.length) await db.insert(analysisTags).values(tags.map((tag) => ({ id: newId("analysistag"), analysisId: id, tag })));
     await writeAudit(user.subject, "analysis.created", "analysis", id, { domain, subjectType, tags });
     return jsonResponse({ id, slug, status: "draft" }, { status: 201 });

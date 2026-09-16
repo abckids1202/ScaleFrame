@@ -1,8 +1,8 @@
 import { env } from "cloudflare:workers";
 import { createRouteSupabaseClient } from "./supabase";
 
-export type CurrentUser = { subject: string; email: string | null; role: "user" | "reviewer" | "moderator" | "admin"; authenticated: boolean };
-type JwtPayload = { sub?: string; email?: string; role?: string; exp?: number; aud?: string; iss?: string };
+export type CurrentUser = { subject: string; email: string | null; emailVerified: boolean; role: "user" | "reviewer" | "moderator" | "admin"; authenticated: boolean };
+type JwtPayload = { sub?: string; email?: string; email_verified?: boolean; role?: string; exp?: number; aud?: string; iss?: string };
 type Jwk = JsonWebKey & { kid?: string; alg?: string; use?: string };
 
 export async function getCurrentUser(request: Request): Promise<CurrentUser | null> {
@@ -10,14 +10,14 @@ export async function getCurrentUser(request: Request): Promise<CurrentUser | nu
     if (env.SUPABASE_URL && env.SUPABASE_ANON_KEY) {
       const { client } = createRouteSupabaseClient(request);
       const { data } = await client.auth.getUser();
-      if (data.user) return { subject: data.user.id, email: data.user.email ?? null, role: "user", authenticated: true };
+      if (data.user) return { subject: data.user.id, email: data.user.email ?? null, emailVerified: Boolean(data.user.email_confirmed_at), role: "user", authenticated: true };
     }
   } catch { /* fall through to bearer verification for service/API clients */ }
   const authorization = request.headers.get("authorization");
   if (!authorization?.startsWith("Bearer ")) return null;
   const payload = await verifySupabaseJwt(authorization.slice(7).trim());
   if (!payload?.sub) return null;
-  return { subject: payload.sub, email: payload.email ?? null, role: payload.role === "admin" || payload.role === "moderator" || payload.role === "reviewer" ? payload.role : "user", authenticated: true };
+  return { subject: payload.sub, email: payload.email ?? null, emailVerified: Boolean(payload.email_verified), role: payload.role === "admin" || payload.role === "moderator" || payload.role === "reviewer" ? payload.role : "user", authenticated: true };
 }
 
 async function verifySupabaseJwt(token: string): Promise<JwtPayload | null> {
