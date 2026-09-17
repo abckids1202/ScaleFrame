@@ -2,7 +2,7 @@ import Link from "next/link";
 import { seedCharacters, seedComparisons, seedMetrics, seedWorks } from "../db/seed-data";
 import { getDb } from "../db";
 import { comparisonRevisions, comparisons } from "../db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { SiteShell } from "./site-shell";
 import SettingsClient from "./settings/settings-client";
 import { researchCatalog } from "../lib/analysis-catalog";
@@ -45,8 +45,23 @@ export function MetricPage({ slug }: { slug: string }) {
 
 export async function ComparisonPage({ slug }: { slug: string }) {
   const item = seedComparisons.find((comparison) => comparison.slug === slug) ?? seedComparisons[0];
-  let stored: { title: string; domain: string; difficulty: string; revisionNumber: number; scoreA?: number; scoreB?: number } | null = null;
-  try { const comparison = (await getDb().select().from(comparisons).where(and(eq(comparisons.slug, slug), eq(comparisons.status, "published"))).limit(1))[0]; if (comparison) { const revision = (await getDb().select().from(comparisonRevisions).where(and(eq(comparisonRevisions.comparisonId, comparison.id), eq(comparisonRevisions.revisionNumber, comparison.revisionNumber))).limit(1))[0]; const snapshot = revision ? JSON.parse(revision.snapshotJson) as { calculation?: { totalA?: number; totalB?: number } } : {}; stored = { title: comparison.title, domain: comparison.domain, difficulty: comparison.difficulty, revisionNumber: comparison.revisionNumber, scoreA: snapshot.calculation?.totalA ? Math.round(snapshot.calculation.totalA * 100) : undefined, scoreB: snapshot.calculation?.totalB ? Math.round(snapshot.calculation.totalB * 100) : undefined }; } } catch { /* public seed fallback remains available while D1 is unavailable */ }
+  let stored: { title: string; domain: string; difficulty: string; revisionNumber: number; scoreA?: number; scoreB?: number; participantsA?: string[]; participantsB?: string[]; question?: string; scoreMode?: "scaled" | "index"; matchupType?: string; outcomeType?: string; metricRows?: Array<{ name: string; weightShare: number; scoreA: number; scoreB: number }> } | null = null;
+  try {
+    const comparison = (await getDb().select().from(comparisons).where(and(or(eq(comparisons.slug, slug), eq(comparisons.id, slug)), eq(comparisons.status, "published"))).limit(1))[0];
+    if (comparison) {
+      const revision = (await getDb().select().from(comparisonRevisions).where(and(eq(comparisonRevisions.comparisonId, comparison.id), eq(comparisonRevisions.revisionNumber, comparison.revisionNumber))).limit(1))[0];
+      const snapshot = revision ? JSON.parse(revision.snapshotJson) as { rules?: string; matchupType?: string; scoreMode?: "scaled" | "index"; outcomeType?: string; participants?: Array<{ side: "A" | "B"; label: string; versionLabel?: string }>; metrics?: Array<{ metricVersionId: string; weight: number }>; calculation?: { sideAPercent?: number; sideBPercent?: number; metricResults?: Array<{ sideAPercent: number; sideBPercent: number; contributionA: number; contributionB: number }> } } : {};
+      const metricResults = snapshot.calculation?.metricResults ?? [];
+      const metricRows = (snapshot.metrics ?? []).map((metric, index) => {
+        const result = metricResults[index];
+        const seedMetric = seedMetrics.find((candidate) => `seed-metric-${candidate.slug}-v1` === metric.metricVersionId);
+        return { name: seedMetric?.name ?? metric.metricVersionId.replace(/^seed-metric-/, "").replace(/-v\d+$/, "").replaceAll("-", " "), weightShare: snapshot.metrics?.length ? metric.weight / snapshot.metrics.reduce((sum, entry) => sum + entry.weight, 0) : 0, scoreA: result?.sideAPercent ?? 0, scoreB: result?.sideBPercent ?? 0 };
+      });
+      const scoreA = snapshot.calculation?.sideAPercent;
+      const scoreB = snapshot.calculation?.sideBPercent;
+      stored = { title: comparison.title, domain: comparison.domain, difficulty: comparison.difficulty, revisionNumber: comparison.revisionNumber, scoreA: typeof scoreA === "number" ? Math.round(scoreA) : undefined, scoreB: typeof scoreB === "number" ? Math.round(scoreB) : undefined, participantsA: (snapshot.participants ?? []).filter((participant) => participant.side === "A").map((participant) => `${participant.label}${participant.versionLabel ? ` · ${participant.versionLabel}` : ""}`), participantsB: (snapshot.participants ?? []).filter((participant) => participant.side === "B").map((participant) => `${participant.label}${participant.versionLabel ? ` · ${participant.versionLabel}` : ""}`), question: snapshot.rules?.split("\n\n")[0], scoreMode: snapshot.scoreMode, matchupType: snapshot.matchupType, outcomeType: snapshot.outcomeType, metricRows };
+    }
+  } catch { /* public seed fallback remains available while D1 is unavailable */ }
   const display = stored ?? { ...item, revisionNumber: 0 };
   return <PublicPage eyebrow={`COMPARISON / ${display.domain}`} title={display.title} description="A public, versioned comparison with explicit rules, visible weights, evidence links, and a recalculable result." active="compare">
     <ComparisonReaderClient item={item} display={display} />
